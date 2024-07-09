@@ -17,7 +17,7 @@ tasks:
 
   ko_build:
     env:
-      KO_DOCKER_REPO: registry.digitalocean.com/clockwork-registry/shareit
+      KO_DOCKER_REPO: ko.local
     cmds:
       - ko build -B ./app
 
