@@ -3,7 +3,7 @@ version: "3"
 tasks:
   build:
     cmds:
-      - go build -o ./dist/shareit ./cmd
+      - go build -o ./dist/shareit ./app
 
   run:
     deps: [build]
@@ -13,11 +13,13 @@ tasks:
   watch:
     aliases: [debug]
     cmds:
-      - go run github.com/mitranim/gow@latest run ./cmd
+      - go run github.com/mitranim/gow@latest run ./app
 
   ko_build:
+    env:
+      KO_DOCKER_REPO: registry.digitalocean.com/clockwork-registry/shareit
     cmds:
-      - ko build ./cmd
+      - ko build -B ./app
 
   docker_build:
     cmds:

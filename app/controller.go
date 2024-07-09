@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/3di-clockwork/devops-test/cmd/types"
+	"github.com/3di-clockwork/shareit/app/types"
 	"github.com/ggicci/httpin"
 	"github.com/justinas/alice"
 )

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/3di-clockwork/devops-test/cmd/types"
+	"github.com/3di-clockwork/shareit/app/types"
 	g "github.com/maragudk/gomponents"
 	c "github.com/maragudk/gomponents/components"
 	. "github.com/maragudk/gomponents/html"

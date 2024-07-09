@@ -45,6 +45,11 @@ func main() {
 
 		w.Header().Add("Content-Type", "application/json")
 		if err != nil || !accessible {
+			if err != nil {
+				slog.ErrorContext(r.Context(), "storage is unavailable", slog.Any("err", err))
+			} else {
+				slog.ErrorContext(r.Context(), "storage is unavailable")
+			}
 			w.WriteHeader(http.StatusServiceUnavailable)
 			_, _ = w.Write([]byte(`{"storage":"unavailable"}`))
 			return
@@ -68,7 +73,7 @@ func main() {
 	// Fallback to home
 	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { http.Redirect(w, r, "/", http.StatusSeeOther) }))
 
-	slog.Info("starting service on port 8080")
+	slog.Info("starting shareit app on port 8080")
 	http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		slog.InfoContext(r.Context(), "request", slog.String("method", r.Method), slog.String("path", r.URL.Path))
 		http.DefaultServeMux.ServeHTTP(w, r)

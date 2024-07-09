@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/3di-clockwork/devops-test/cmd/types"
+	"github.com/3di-clockwork/shareit/app/types"
 	"github.com/flytam/filenamify"
 	"github.com/google/uuid"
 	"gocloud.dev/blob"

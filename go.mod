@@ -1,4 +1,4 @@
-module github.com/3di-clockwork/devops-test
+module github.com/3di-clockwork/shareit
 
 go 1.22.5
 

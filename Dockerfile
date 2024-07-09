@@ -5,7 +5,7 @@ FROM golang:latest as build
 
 WORKDIR /src
 COPY . .
-RUN CGO_ENABLED=0 go build -o dist/shareit ./cmd
+RUN CGO_ENABLED=0 go build -o dist/shareit ./app
 
 #######################
 # FINAL IMAGE
