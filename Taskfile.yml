@@ -1,0 +1,29 @@
+version: "3"
+
+tasks:
+  build:
+    cmds:
+      - go build -o ./dist/shareit ./cmd
+
+  run:
+    deps: [build]
+    cmds:
+      - ./dist/shareit
+
+  watch:
+    aliases: [debug]
+    cmds:
+      - go run github.com/mitranim/gow@latest run ./cmd
+
+  ko_build:
+    cmds:
+      - ko build ./cmd
+
+  docker_build:
+    cmds:
+      - docker build . -t shareit:latest
+
+  docker_run:
+    deps: [docker_build]
+    cmds:
+      - docker run -p 8080:8080 shareit:latest

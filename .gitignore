@@ -1,0 +1,15 @@
+storage
+dist
+
+# OS files
+.DS_Store
+
+# Taskfile
+.task/*
+
+# editors
+.vscode
+# vscode local history files
+.history
+# emacs backup files
+*~
