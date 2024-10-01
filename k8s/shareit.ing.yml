@@ -9,7 +9,7 @@ metadata:
 spec:
   ingressClassName: caddy
   rules:
-  - host: $SHAREIT_ENDPOINT
+  - host: ${SHAREIT_ENDPOINT}
     http:
       paths:
       - path: /

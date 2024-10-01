@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: shareit
-        image: ${DOCKER_REGISTRY_URI}/{$DOCKER_REGISTRY_NAME}/shareit:${SHAREIT_VERSION_TAG}
+        image: ${DOCKER_REGISTRY_URI}/${DOCKER_REGISTRY_NAME}/shareit:${SHAREIT_VERSION_TAG}
         imagePullPolicy: Always
         ports:
           - name: shareit-port
