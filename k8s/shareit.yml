@@ -23,10 +23,19 @@ spec:
           containerPort: 8080
         env:
         - name: PUBLIC_URL
-          value: $SHAREIT_PUBLIC_URL
-        volumeMounts:
-        - mountPath: /storage
-          name: empty-vol
+          value: https://${SHAREIT_ENDPOINT}
+        - name: BLOB_STORAGE_URL
+          value: "s3://${DO_S3_BUCKET}?endpoint=${DO_S3_ENDPOINT}"
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: do-s3-crendentials
+              key: access_key_id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: do-s3-crendentials
+              key: secret_access_key
         livenessProbe:
           httpGet:
             path: /healthz
@@ -39,6 +48,3 @@ spec:
             port: shareit-port
           initialDelaySeconds: 5
           timeoutSeconds: 1
-      volumes:
-      - name: empty-vol
-        emptyDir: {}

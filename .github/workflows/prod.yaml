@@ -53,11 +53,16 @@ jobs:
         DOCKER_REGISTRY_NAME: ${{ vars.DOCKER_REGISTRY_NAME }}
         SHAREIT_ENDPOINT: ${{ vars.SHAREIT_ENDPOINT }}
         SHAREIT_VERSION_TAG: ${{ needs.build.outputs.tag }}
+        DO_S3_BUCKET: ${{ vars.DO_S3_BUCKET }}
+        DO_S3_ENDPOINT: ${{ vars.DO_S3_ENDPOINT }}
       run: |
-        find . -name '*.yml' -print0 | xargs -0 sed -i 's/${DOCKER_REGISTRY_URI}/'"$DOCKER_REGISTRY_URI"'/g'
-        find . -name '*.yml' -print0 | xargs -0 sed -i 's/${DOCKER_REGISTRY_NAME}/'"$DOCKER_REGISTRY_NAME"'/g'
-        find . -name '*.yml' -print0 | xargs -0 sed -i 's/${SHAREIT_ENDPOINT}/'"$SHAREIT_ENDPOINT"'/g'
-        find . -name '*.yml' -print0 | xargs -0 sed -i 's/${SHAREIT_VERSION_TAG}/'"$SHAREIT_VERSION_TAG"'/g'
+        find . -name '*.yml' -print0 | xargs -0 sed -i \
+          -e 's#${DOCKER_REGISTRY_URI}#'"$DOCKER_REGISTRY_URI"'#g' \
+          -e 's#${DOCKER_REGISTRY_NAME}#'"$DOCKER_REGISTRY_NAME"'#g' \
+          -e 's#${SHAREIT_ENDPOINT}#'"$SHAREIT_ENDPOINT"'#g' \
+          -e 's#${SHAREIT_VERSION_TAG}#'"$SHAREIT_VERSION_TAG"'#g' \
+          -e 's#${DO_S3_BUCKET}#'"$DO_S3_BUCKET"'#g' \
+          -e 's#${DO_S3_ENDPOINT}#'"$DO_S3_ENDPOINT"'#g'
       working-directory: ./k8s
 
     - name: Deploy new version
