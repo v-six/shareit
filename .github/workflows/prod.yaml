@@ -1,0 +1,38 @@
+name: Deploy prod on DO
+on:
+  workflow_run:
+    workflows: [Continuous Integration]
+    types:
+      - completed
+    branches: [main]
+
+jobs:
+  build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # S'assure que la CI a réussi
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-go@v5
+      with:
+        go-version: '1.22.5'
+
+    - uses: ko-build/setup-ko@v0.7
+      env:
+        KO_DOCKER_REPO: ${{ vars.DOCKER_REGISTRY_URI }}/${{ vars.DOCKER_REGISTRY_NAME }}/shareit
+
+    - name: Generate version tag
+      id: build_tag
+      run: |
+        echo "SHAREIT_VERSION_TAG=$(git rev-parse --short=8 ${{ github.sha }})" >> $GITHUB_ENV
+
+    - name: Login registry
+      env:
+        auth_token: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+        username: ${{ secrets.DOCKER_REGISTRY_USER }}
+      run: |
+        echo "${auth_token}" | ko login ${{ vars.DOCKER_REGISTRY_URI }} --username ${username} --password-stdin
+
+    - name: Build and push image
+      run: ko build --bare ./app -t latest -t ${{ env.SHAREIT_VERSION_TAG }} --push
