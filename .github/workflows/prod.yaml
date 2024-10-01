@@ -67,3 +67,10 @@ jobs:
       with:
         args: apply -f ./k8s
 
+    - name: Check for deployment
+      uses: actions-hub/kubectl@v1.31.1
+      env:
+        KUBE_CONFIG: ${{ secrets.DO_KUBE_CONFIG }}
+      with:
+        args: rollout status deployment shareit --timeout=60s -n shareit
+
