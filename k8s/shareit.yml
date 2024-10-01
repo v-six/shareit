@@ -19,11 +19,14 @@ spec:
         image: ${DOCKER_REGISTRY_URI}/${DOCKER_REGISTRY_NAME}/shareit:${SHAREIT_VERSION_TAG}
         imagePullPolicy: Always
         ports:
-          - name: shareit-port
-            containerPort: 8080
+        - name: shareit-port
+          containerPort: 8080
         env:
-          - name: PUBLIC_URL
-            value: $SHAREIT_PUBLIC_URL
+        - name: PUBLIC_URL
+          value: $SHAREIT_PUBLIC_URL
+        volumeMounts:
+        - mountPath: /storage
+          name: empty-vol
         livenessProbe:
           httpGet:
             path: /healthz
@@ -36,3 +39,6 @@ spec:
             port: shareit-port
           initialDelaySeconds: 5
           timeoutSeconds: 1
+      volumes:
+      - name: empty-vol
+        emptyDir: {}
