@@ -1,0 +1,21 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shareit-ing
+  namespace: shareit
+  labels:
+    app: shareit
+spec:
+  ingressClassName: caddy
+  rules:
+  - host: $SHAREIT_ENDPOINT
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: shareit-svc
+            port:
+              number: 80

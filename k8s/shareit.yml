@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shareit
+  namespace: shareit
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shareit
+  template:
+    metadata:
+      labels:
+        app: shareit
+    spec:
+      containers:
+      - name: shareit
+        image: ${DOCKER_REGISTRY_URI}/{$DOCKER_REGISTRY_NAME}/shareit:${SHAREIT_VERSION_TAG}
+        imagePullPolicy: Always
+        ports:
+          - name: shareit-port
+            containerPort: 8080
+        env:
+          - name: PUBLIC_URL
+            value: $SHAREIT_PUBLIC_URL
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: shareit-port
+          periodSeconds: 60
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: shareit-port
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
