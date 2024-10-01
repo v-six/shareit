@@ -8,8 +8,10 @@ on:
 
 jobs:
   build:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # S'assure que la CI a réussi
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.build_tag.outputs.SHAREIT_VERSION_TAG }}
 
     steps:
     - uses: actions/checkout@v4
@@ -26,6 +28,7 @@ jobs:
       id: build_tag
       run: |
         echo "SHAREIT_VERSION_TAG=$(git rev-parse --short=8 ${{ github.sha }})" >> $GITHUB_ENV
+        echo "SHAREIT_VERSION_TAG=$(git rev-parse --short=8 ${{ github.sha }})" >> $GITHUB_OUTPUT
 
     - name: Login registry
       env:
@@ -36,3 +39,29 @@ jobs:
 
     - name: Build and push image
       run: ko build --bare ./app -t latest -t ${{ env.SHAREIT_VERSION_TAG }} --push
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Substitute env in k8s
+      env:
+        DOCKER_REGISTRY_URI: ${{ vars.DOCKER_REGISTRY_URI }}
+        DOCKER_REGISTRY_NAME: ${{ vars.DOCKER_REGISTRY_NAME }}
+        SHAREIT_ENDPOINT: ${{ vars.SHAREIT_ENDPOINT }}
+        SHAREIT_VERSION_TAG: ${{ needs.build.outputs.tag }}
+      run: |
+        find . -name '*.yml' -print0 | xargs -0 sed -i 's/${DOCKER_REGISTRY_URI}/'"$DOCKER_REGISTRY_URI"'/g'
+        find . -name '*.yml' -print0 | xargs -0 sed -i 's/${DOCKER_REGISTRY_NAME}/'"$DOCKER_REGISTRY_NAME"'/g'
+        find . -name '*.yml' -print0 | xargs -0 sed -i 's/${SHAREIT_ENDPOINT}/'"$SHAREIT_ENDPOINT"'/g'
+        find . -name '*.yml' -print0 | xargs -0 sed -i 's/${SHAREIT_VERSION_TAG}/'"$SHAREIT_VERSION_TAG"'/g'
+      working-directory: ./k8s
+
+    - name: Deploy new version
+      uses: actions-hub/kubectl@v1.31.1
+      with:
+        args: apply -f ./k8s
+
