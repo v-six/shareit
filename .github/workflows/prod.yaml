@@ -53,16 +53,15 @@ jobs:
         DOCKER_REGISTRY_NAME: ${{ vars.DOCKER_REGISTRY_NAME }}
         SHAREIT_ENDPOINT: ${{ vars.SHAREIT_ENDPOINT }}
         SHAREIT_VERSION_TAG: ${{ needs.build.outputs.tag }}
-        DO_S3_BUCKET: ${{ vars.DO_S3_BUCKET }}
-        DO_S3_ENDPOINT: ${{ vars.DO_S3_ENDPOINT }}
+        DO_S3_URL: ${{ vars.DO_S3_URL }}
       run: |
+        escaped_do_s3_url=$(echo "$DO_S3_URL" | sed 's/&/\\&/g')
         find . -name '*.yml' -print0 | xargs -0 sed -i \
           -e 's#${DOCKER_REGISTRY_URI}#'"$DOCKER_REGISTRY_URI"'#g' \
           -e 's#${DOCKER_REGISTRY_NAME}#'"$DOCKER_REGISTRY_NAME"'#g' \
           -e 's#${SHAREIT_ENDPOINT}#'"$SHAREIT_ENDPOINT"'#g' \
           -e 's#${SHAREIT_VERSION_TAG}#'"$SHAREIT_VERSION_TAG"'#g' \
-          -e 's#${DO_S3_BUCKET}#'"$DO_S3_BUCKET"'#g' \
-          -e 's#${DO_S3_ENDPOINT}#'"$DO_S3_ENDPOINT"'#g'
+          -e 's#${DO_S3_URL}#'"$escaped_do_s3_url"'#g'
       working-directory: ./k8s
 
     - name: Deploy new version

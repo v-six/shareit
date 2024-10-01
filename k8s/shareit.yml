@@ -25,7 +25,7 @@ spec:
         - name: PUBLIC_URL
           value: https://${SHAREIT_ENDPOINT}
         - name: BLOB_STORAGE_URL
-          value: "s3://${DO_S3_BUCKET}?endpoint=${DO_S3_ENDPOINT}"
+          value: ${DO_S3_URL}
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
