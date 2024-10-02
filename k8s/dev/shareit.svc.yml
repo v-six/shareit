@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shareit-dev-svc
+  namespace: shareit
+  labels:
+    app: shareit-dev
+spec:
+  selector:
+    app: shareit-dev
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: ClusterIP

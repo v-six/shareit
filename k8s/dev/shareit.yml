@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shareit-dev
+  namespace: shareit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shareit-dev
+  template:
+    metadata:
+      labels:
+        app: shareit-dev
+    spec:
+      containers:
+      - name: shareit
+        image: ${DOCKER_REGISTRY_URI}/${DOCKER_REGISTRY_NAME}/shareit:${SHAREIT_VERSION_TAG}
+        imagePullPolicy: Always
+        ports:
+        - name: shareit-port
+          containerPort: 8080
+        env:
+        - name: PUBLIC_URL
+          value: https://${SHAREIT_ENDPOINT}
+        - name: BLOB_STORAGE_URL
+          value: ${DO_S3_URL}
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: do-s3-crendentials
+              key: access_key_id
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: do-s3-crendentials
+              key: secret_access_key
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: shareit-port
+          periodSeconds: 60
+          timeoutSeconds: 1
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: shareit-port
+          initialDelaySeconds: 5
+          timeoutSeconds: 1

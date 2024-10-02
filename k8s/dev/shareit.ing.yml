@@ -1,0 +1,25 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shareit-dev-ing
+  namespace: shareit
+  labels:
+    app: shareit-dev
+  # No auth available on caddy ingress: https://github.com/caddyserver/ingress/issues/143
+  #annotations:
+    #caddy.ingress.kubernetes.io/auth-type: basic
+    #caddy.ingress.kubernetes.io/auth-secret: basic-auth: basic
+spec:
+  ingressClassName: caddy
+  rules:
+  - host: ${SHAREIT_ENDPOINT}
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: shareit-dev-svc
+            port:
+              number: 80

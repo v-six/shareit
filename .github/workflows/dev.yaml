@@ -1,0 +1,85 @@
+name: Deploy dev on DO
+on:
+  workflow_run:
+    workflows: [Continuous Integration]
+    types:
+      - completed
+    branches: [develop]
+
+jobs:
+  build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.build_tag.outputs.SHAREIT_VERSION_TAG }}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.workflow_run.head_branch }}
+
+    - uses: actions/setup-go@v5
+      with:
+        go-version: '1.22.5'
+
+    - uses: ko-build/setup-ko@v0.7
+      env:
+        KO_DOCKER_REPO: ${{ vars.DOCKER_REGISTRY_URI }}/${{ vars.DOCKER_REGISTRY_NAME }}/shareit
+
+    - name: Generate version tag
+      id: build_tag
+      run: |
+        echo "SHAREIT_VERSION_TAG=$(git rev-parse --short=7 ${{ github.sha }})-dev" >> $GITHUB_ENV
+        echo "SHAREIT_VERSION_TAG=$(git rev-parse --short=7 ${{ github.sha }})-dev" >> $GITHUB_OUTPUT
+
+    - name: Login registry
+      env:
+        auth_token: ${{ secrets.DOCKER_REGISTRY_TOKEN }}
+        username: ${{ secrets.DOCKER_REGISTRY_USER }}
+      run: |
+        echo "${auth_token}" | ko login ${{ vars.DOCKER_REGISTRY_URI }} --username ${username} --password-stdin
+
+    - name: Build and push image
+      run: ko build --bare ./app -t dev -t ${{ env.SHAREIT_VERSION_TAG }} --push
+
+  deploy:
+    needs: build
+    environment: develop
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.workflow_run.head_branch }}
+
+    - name: Substitute env in k8s
+      env:
+        DOCKER_REGISTRY_URI: ${{ vars.DOCKER_REGISTRY_URI }}
+        DOCKER_REGISTRY_NAME: ${{ vars.DOCKER_REGISTRY_NAME }}
+        SHAREIT_ENDPOINT: ${{ vars.SHAREIT_ENDPOINT }}
+        SHAREIT_VERSION_TAG: ${{ needs.build.outputs.tag }}
+        DO_S3_URL: ${{ vars.DO_S3_URL }}
+      run: |
+        escaped_do_s3_url=$(echo "$DO_S3_URL" | sed 's/&/\\&/g')
+        find . -name '*.yml' -print0 | xargs -0 sed -i \
+          -e 's#${DOCKER_REGISTRY_URI}#'"$DOCKER_REGISTRY_URI"'#g' \
+          -e 's#${DOCKER_REGISTRY_NAME}#'"$DOCKER_REGISTRY_NAME"'#g' \
+          -e 's#${SHAREIT_ENDPOINT}#'"$SHAREIT_ENDPOINT"'#g' \
+          -e 's#${SHAREIT_VERSION_TAG}#'"$SHAREIT_VERSION_TAG"'#g' \
+          -e 's#${DO_S3_URL}#'"$escaped_do_s3_url"'#g'
+      working-directory: ./k8s/dev
+
+    - name: Deploy new version
+      uses: actions-hub/kubectl@v1.31.1
+      env:
+        KUBE_CONFIG: ${{ secrets.DO_KUBE_CONFIG }}
+      with:
+        args: apply -f ./k8s/dev
+
+    - name: Check for deployment
+      uses: actions-hub/kubectl@v1.31.1
+      env:
+        KUBE_CONFIG: ${{ secrets.DO_KUBE_CONFIG }}
+      with:
+        args: rollout status deployment shareit-dev --timeout=60s -n shareit
+
