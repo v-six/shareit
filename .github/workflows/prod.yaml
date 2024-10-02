@@ -38,6 +38,8 @@ jobs:
         echo "${auth_token}" | ko login ${{ vars.DOCKER_REGISTRY_URI }} --username ${username} --password-stdin
 
     - name: Build and push image
+      env:
+        LDFLAGS: "-s -w"
       run: ko build --bare ./app -t latest -t ${{ env.SHAREIT_VERSION_TAG }} --push
 
   deploy:
