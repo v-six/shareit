@@ -16,6 +16,7 @@ jobs:
       run: go get .
       working-directory: ./app
 
+# Disabled for performance (no test to run)
 #    - name: Run tests
 #      run: go test -v
 #      working-directory: ./app
