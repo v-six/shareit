@@ -30,3 +30,33 @@ go run ./cmd
 ## About the `/healthz` endpoint
 
 An health check endpoint is available at `/healthz`. It is advised to use it as it checks the availability of the underlying storage. A status code of 200 OK means everything is fine.
+
+## About CI / CD
+
+### CI
+
+CI is running on every push:
+- testing *(disabled for now)*
+- linting
+- building 
+ 
+### Develop CD
+
+Develop CD is running on every push on `develop` branch.
+- URL: https://shareit-dev.do-interview2.cw.substance3d.io
+- S3: https://shareit-dev-storage.ams3.digitaloceanspaces.com
+- Docker tags: `dev` `${github.short_sha}-dev`
+
+### Production CD
+
+Production CD is running on every push on `main` branch.
+- URL: https://shareit.do-interview2.cw.substance3d.io
+- S3: https://shareit-storage.ams3.digitaloceanspaces.com
+- Docker tags: `latest` `${github.short_sha}`
+
+The build is optimized with `-ldflags="-s -w"`
+
+## About branches
+
+- `main`: production protected branch. Merge changes with PR only.
+- `develop`: develoment branch. Use it daily to add new features.
