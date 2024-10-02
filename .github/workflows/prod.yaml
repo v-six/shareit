@@ -27,8 +27,8 @@ jobs:
     - name: Generate version tag
       id: build_tag
       run: |
-        echo "SHAREIT_VERSION_TAG=$(git rev-parse --short=8 ${{ github.sha }})" >> $GITHUB_ENV
-        echo "SHAREIT_VERSION_TAG=$(git rev-parse --short=8 ${{ github.sha }})" >> $GITHUB_OUTPUT
+        echo "SHAREIT_VERSION_TAG=$(git rev-parse --short=7 ${{ github.sha }})" >> $GITHUB_ENV
+        echo "SHAREIT_VERSION_TAG=$(git rev-parse --short=7 ${{ github.sha }})" >> $GITHUB_OUTPUT
 
     - name: Login registry
       env:
